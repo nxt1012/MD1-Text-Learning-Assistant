@@ -42,7 +42,7 @@
 
                 <div class="col-md-4"> </div>
                 <div class="flashcard col-md-4">
-                    <p>Click "Change the question!" to begin</p>
+                    <p id="endGame">Click "Change the question!" to begin</p>
                     <h3 id="docking"></h3>
                 </div>
 
@@ -62,14 +62,31 @@
     let glossary = JSON.parse(localStorage.getItem("glossary"));
     console.log(glossary, typeof glossary)
     let currentQuestion;
+    let random = 0;
     function changeQuestion() {
-        let random = Math.floor(Math.random() * glossary.length);
-        currentQuestion = glossary[random]
-        document.getElementById("docking").innerHTML = glossary[random]["term"];
-        console.log(glossary[random]["term"])
+        if (glossary.length > 0) {
+            random = Math.floor(Math.random() * glossary.length);
+            currentQuestion = glossary[random]
+            document.getElementById("docking").innerHTML = glossary[random]["term"];
+            console.log(glossary, glossary[random]["term"])
+        } else {
+            document.getElementById("docking").innerHTML = "";
+            document.getElementById("endGame").innerHTML = "You haven't had anything left to review.";
+            glossary = [];
+            document.getElementById("question").style.visibility = "hidden";
+            document.getElementById("checkanswer").style.visibility = "hidden";
+        }
     }
-    function checkAnswer(current) {
-        document.getElementById("docking").innerHTML = currentQuestion["note"];
+    function checkAnswer() {
+        if (glossary.length > 0){
+            document.getElementById("docking").innerHTML = currentQuestion["note"];
+            glossary.splice(random, 1);
+        } else {
+            document.getElementById("docking").innerHTML = "";
+            glossary = [];
+            document.getElementById("question").style.visibility = "hidden";
+            document.getElementById("checkanswer").style.visibility = "hidden";
+        }
     }
 </script>
 </body>
