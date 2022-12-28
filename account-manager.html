@@ -43,6 +43,7 @@
   <a href="about.html">About</a>
   <a href="contact.html">Contact</a>
   <a href="register.html" id="complete">Register</a>
+  <a href="account-manager.html" id="accountManagerLoggedIn" style="visibility: hidden">Admin</a>
   <p style="visibility: hidden; text-align: right" id="loggedIn">Welcome, <span id="loggedInUsername">Test</span> <span onclick="logout()">Log Out</span></p>
   <div class="login-container">
     <form action="">
@@ -112,37 +113,36 @@
   <!--END MODAL DELETE-->
 
 <script>
-  listUser = localStorage.getItem("user");
-  if (listUser === null){
-    listUser = [];
+  let user = JSON.parse(localStorage.getItem("user"));
+  if (user === null){
+    user = []
   }
-
+  console.log(user, typeof user)
   function showListUser() {
     let drawTable = "<table><tr><th>#</th><th>User</th><th>Email</th><th>Password</th><th>Edit</th><th>Delete</th></tr>";
-    for (let i = 0; i <listUser.length; i++){
-      drawTable += `<tr><td>${i+1}</td><td>${listUser[i].username}</td><td>${listUser[i].email}</td><td>${listUser[i].password}</td><td class="btn-change" ><button  class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal"
-                               data-bs-whatever="${listUser[i].name}" onclick="editModal(${listUser[i].id})"><i class="bi bi-pen-fill"></i>EDIT</button></td>
+    for (let i = 0; i <user.length; i++){
+      drawTable += `<tr><td>${i+1}</td><td>${user[i].username}</td><td>${user[i].email}</td><td>${user[i].password}</td><td class="btn-change" ><button  class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal"
+                               data-bs-whatever="${user[i].name}" onclick="editModal(${user[i].id})"><i class="bi bi-pen-fill"></i>EDIT</button></td>
                               <td class="btn-change"><button  class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#exampleModalDelete"
-                               data-bs-whatever="${listUser[i].name}" onclick="deleteModal(${listUser[i].id})"><i class="bi bi-bag-x"></i>DELETE</button></td></tr>`
+                               data-bs-whatever="${user[i].name}" onclick="deleteModal(${user[i].id})"><i class="bi bi-bag-x"></i>DELETE</button></td></tr>`
     } drawTable += `</table>`
     document.getElementById("drawTable").innerHTML = drawTable;
   }
-  showListUser();
-
+  showListUser()
   function createUser() {
     let newUsername = document.getElementById("newUsername").value;
     let newEmail = document.getElementById("newEmail").value;
     let newPassword = document.getElementById("newPassword").value;
-    listUser[listUser.length] = new User(listUser.length, newUsername, newEmail, newPassword);
-    localStorage.removeItem("list_user");
-    localStorage.setItem("user", JSON.stringify(listUser));
+    user[user.length] = new User(user.length, newUsername, newEmail, newPassword);
+    localStorage.removeItem("user");
+    localStorage.setItem("user", JSON.stringify(user));
     showListUser();
   }
 
   function findById(id){
-    for (let i = 0; i < listUser.length; i++){
-      if (id === listUser[i].id){
-        return listUser[i];
+    for (let i = 0; i < user.length; i++){
+      if (id === user[i].id){
+        return user[i];
       }
     }
   }
@@ -166,8 +166,8 @@
     updateUser.username = updateUsername;
     updateUser.email = updateEmail;
     updateUser.password = updatePassword;
-    localStorage.removeItem("list_user");
-    localStorage.setItem("list_user", JSON.stringify(listUser));
+    localStorage.removeItem("user");
+    localStorage.setItem("user", JSON.stringify(user));
     showListUser()
   }
   //DELETE USER
@@ -176,14 +176,13 @@
     idDelete = id;
   }
   function deleteUser(){
-    for (let i = 0; i < listUser.length; i++){
-      if( listUser[i].id === idDelete){
-        listUser.splice(i, 1)
+    for (let i = 0; i < user.length; i++){
+      if( user[i].id === idDelete){
+        user.splice(i, 1)
       }
     }
-    localStorage.removeItem("list_user");
-    localStorage.setItem("list_user", JSON.stringify(listUser))
-    localStorage.setItem("user", JSON.stringify(listUser))
+    localStorage.removeItem("user");
+    localStorage.setItem("user", JSON.stringify(user))
     showListUser();
   }
 

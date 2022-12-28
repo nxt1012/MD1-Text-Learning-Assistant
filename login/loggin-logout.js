@@ -5,6 +5,7 @@ let loginStatus;
 listUser = JSON.parse(localStorage.getItem("user"));
 
 function login() {
+    console.log("user logged in")
     loginStatus = false;
     logUsername = document.getElementById("username").value;
     logPassword = document.getElementById("password").value;

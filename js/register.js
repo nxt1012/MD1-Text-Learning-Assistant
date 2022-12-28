@@ -2,15 +2,17 @@ let username;
 let email;
 let password;
 let passwordRepeat;
-let user = [];
+let user = localStorage.getItem("user");
+if (user === null){
+    user = []
+}
 function createAccount() {
     username = document.getElementById("username").value;
     email = document.getElementById("email").value;
     password = document.getElementById("password").value;
     passwordRepeat = document.getElementById("passwordRepeat").value;
-    console.log(username, email, password, passwordRepeat)
-    if (checkEmail() && checkPassword() && checkUserExist()) {
-        user[user.length] = new User(username, email, password);
+    if (checkEmail() && checkPassword() && checkUserExist() && checkEmailExist()) {
+        user[user.length] = new User(user.length, username, email, password);
         localStorage.setItem("user", JSON.stringify(user))
         alert("Account created successfully!")
     }
@@ -18,27 +20,28 @@ function createAccount() {
 }
 
 function checkUserExist() {
-    let arr = JSON.parse(localStorage.getItem("user"))
-    if (arr === null) {
-        if (checkEmail()) {
-            user[user.length] = new User(username, email, password);
-            localStorage.setItem("user", JSON.stringify(user))
-            alert("Account created successfully!")
+    let flag = true;
+    for (let i = 0; i < user.length; i++) {
+        if (user[i]["username"] === username) {
+            alert("This username has already been used! Choose another one!")
             return false;
-        } return false
-    } else {
-        for (let i = 0; i < arr.length; i++) {
-            console.log(arr.length);
-            if (arr[i]["username"] === username) {
-                alert("This username has already been used! Choose another one!")
-                return false
-            } else if (arr[i]["email"] === email) {
-                alert("This email has already been used! Choose another one!")
-                return false
-            }
-            return true
         }
     }
+    return flag;
+}
+
+function checkEmailExist() {
+    //cắm cờ
+    let flag = true;
+    for (let i = 0; i < user.length; i++) {
+        if (user[i]["email"] === email) {
+            alert("This email has already been used! Choose another one!")
+            //nếu có biến, đổi màu cờ, thoát vòng lặp vì không cần kiểm tra thêm
+            return false;
+        }
+    }
+    //trả về màu cờ, bất kể có biến hay không
+    return flag
 }
 function checkEmail(){
     if(/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email)){
