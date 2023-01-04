@@ -17,7 +17,8 @@
 <body>
 <div class="topnav">
     <a class="active" href="index.html"><i class="fa fa-home" aria-hidden="true"></i></a>
-    <a href="simple-flashcard.html">Flashcards</a>
+    <a href="input.html">Input Text</a>
+    <a href="note-manager.html">Review Text</a>
     <a href="about.html">About</a>
     <a href="contact.html">Contact</a>
     <a href="register.html" id="complete">Register</a>
@@ -26,48 +27,50 @@
     <div class="login-container">
         <form action="">
             <input type="text" placeholder="Username" name="username" id="username">
-            <input type="text" placeholder="Password" name="password" id="password">
+            <input type="password" placeholder="Password" name="password" id="password">
             <button type="button" onclick="login()" id="loginButton">Login</button>
         </form>
     </div>
 </div>
-    <div class="container-fluid">
+    <div class="container-fluid" id="flashcardPage">
 
         <div class="head">
             <h2>Review in Flashcards!</h2>
         </div>
-
         <div class="section">
             <div class="row">
 
                 <div class="col-md-4"> </div>
                 <div class="flashcard col-md-4">
-                    <p id="endGame">Click "Change the question!" to begin</p>
+                    <p id="endGame">Click "Next Question >" to begin</p>
                     <h3 id="docking"></h3>
                 </div>
 
                 <div class="col-md-4"> </div>
 
             </div>
-                <button type="button" class="btn btn-default" id="question" onclick="changeQuestion()">Change the question!</button>
-                <button type="button" class="btn btn-default" id="checkanswer" onclick="checkAnswer()">Check the answer!</button>
-
+                <button type="button" class="btn btn-default" id="question" onclick="changeQuestion()">Next Question ></button>
+                <button type="button" class="btn btn-default" id="checkanswer" onclick="checkAnswer()">Check the Answer!</button>
+                <button type="button" class="btn btn-default" id="right" onclick="right()">I remember it!</button>
         </div>
-
+        <div id="result"style="text-align: center"></div>
     </div>
-
+<div class="loginToUse" style="text-align: center">
+    <p>You must login in order to use this function</p>
+</div>
 <script>
     loginStatus = localStorage.getItem("status");
     checkLoginStatus(loginStatus);
-    let glossary = JSON.parse(localStorage.getItem("glossary"));
-    console.log(glossary, typeof glossary)
+    let glossary = JSON.parse(sessionStorage.getItem("glossary"));
     let currentQuestion;
     let random = 0;
+    let count = glossary.length;
     function changeQuestion() {
         if (glossary.length > 0) {
             random = Math.floor(Math.random() * glossary.length);
             currentQuestion = glossary[random]
             document.getElementById("docking").innerHTML = glossary[random]["term"];
+            document.getElementById("result").innerHTML = `You have ${glossary.length}/${count} terms to review`
             console.log(glossary, glossary[random]["term"])
         } else {
             document.getElementById("docking").innerHTML = "";
@@ -75,17 +78,35 @@
             glossary = [];
             document.getElementById("question").style.visibility = "hidden";
             document.getElementById("checkanswer").style.visibility = "hidden";
+            document.getElementById("right").style.visibility = "hidden";
+            document.getElementById("result").innerHTML = "";
         }
     }
     function checkAnswer() {
         if (glossary.length > 0){
             document.getElementById("docking").innerHTML = currentQuestion["note"];
-            glossary.splice(random, 1);
+            document.getElementById("result").innerHTML = `You have ${glossary.length}/${count} terms to review`
         } else {
             document.getElementById("docking").innerHTML = "";
             glossary = [];
             document.getElementById("question").style.visibility = "hidden";
             document.getElementById("checkanswer").style.visibility = "hidden";
+            document.getElementById("right").style.visibility = "hidden";
+            document.getElementById("result").innerHTML = "";
+        }
+    }
+    function right() {
+        if (glossary.length > 0){
+            document.getElementById("docking").innerHTML = currentQuestion["note"];
+            glossary.splice(random, 1);
+            changeQuestion();
+        } else {
+            document.getElementById("docking").innerHTML = "";
+            glossary = [];
+            document.getElementById("question").style.visibility = "hidden";
+            document.getElementById("checkanswer").style.visibility = "hidden";
+            document.getElementById("right").style.visibility = "hidden";
+            document.getElementById("result").innerHTML = "";
         }
     }
 </script>

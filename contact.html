@@ -16,7 +16,8 @@
 <body>
 <div class="topnav">
     <a class="active" href="index.html"><i class="fa fa-home" aria-hidden="true"></i></a>
-    <a href="simple-flashcard.html">Flashcards</a>
+    <a href="input.html">Input Text</a>
+    <a href="note-manager.html">Review Text</a>
     <a href="about.html">About</a>
     <a href="contact.html">Contact</a>
     <a href="register.html" id="complete">Register</a>
@@ -25,11 +26,12 @@
     <div class="login-container">
         <form action="">
             <input type="text" placeholder="Username" name="username" id="username">
-            <input type="text" placeholder="Password" name="password" id="password">
+            <input type="password" placeholder="Password" name="password" id="password">
             <button type="button" onclick="login()" id="loginButton">Login</button>
         </form>
     </div>
 </div>
+<div id="contactMe">
     <div class="container">
         <form action="/action_page.php">
             <h3>Contact Form</h3>
@@ -53,7 +55,10 @@
             <input type="submit" value="Submit">
         </form>
     </div>
-
+</div>
+<div class="loginToUse" style="text-align: center">
+    <p>You must login in order to use this function</p>
+</div>
 
 <script>
     loginStatus = localStorage.getItem("status");

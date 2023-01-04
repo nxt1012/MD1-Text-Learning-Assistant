@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css" integrity="sha512-MV7K8+y+gLIBoVD59lQIYicR65iaqukzvf/nwasF0nqhPay5w/9lJmVM2hMDcnK1OnMGCdVK+iQrJ7lzPJQd1w==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+  <title>Terms & Notes Manager</title>
+  <script src="login/loggin-logout.js"></script>
+  <style>
+    table {
+      font-family: arial, sans-serif;
+      border-collapse: collapse;
+      width: 100%;
+    }
+
+    td, th {
+      border: 1px solid #dddddd;
+      text-align: left;
+      padding: 8px;
+    }
+
+    tr:nth-child(even) {
+      background-color: #dddddd;
+    }
+    .center {
+      text-align: center;
+    }
+  </style>
+  <script src="js/User.js"></script>
+  <script src="login/check-login-status.js"></script>
+</head>
+<body>
+
+<div class="topnav">
+  <a class="active" href="index.html"><i class="fa fa-home" aria-hidden="true"></i></a>
+  <a href="input.html">Input Text</a>
+  <a href="note-manager.html">Review Text</a>
+  <a href="about.html">About</a>
+  <a href="contact.html">Contact</a>
+  <a href="register.html" id="complete">Register</a>
+  <a href="account-manager.html" id="accountManagerLoggedIn" style="visibility: hidden">Admin</a>
+  <p style="visibility: hidden; text-align: right" id="loggedIn">Welcome, <span id="loggedInUsername">Test</span> <span onclick="logout()">Log Out</span></p>
+  <div class="login-container">
+    <form action="">
+      <input type="text" placeholder="Username" name="username" id="username">
+      <input type="password" placeholder="Password" name="password" id="password">
+      <button type="button" onclick="login()" id="loginButton">Login</button>
+    </form>
+  </div>
+</div>
+<div id="noteManagerPanel">
+  <h3 class="center">TERMS & NOTES MANAGER PANEL</h3>
+  <h4>Select inputed text to change note data:</h4>
+  <select name="TextCollectionByTitle" id="textCollectionScheme" style="margin-bottom: 10px" onchange="getSchemeValue()">
+  </select>
+  <div>
+    <h4>Check into Review and Start Playing</h4>
+    <table id="drawTable"></table>
+  </div>
+  <!--BEGIN MODAL EDIT-->
+  <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Edit Account Information</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form>
+            <div class="mb-3">
+              <label  class="col-form-label">Term</label>
+              <input type="text" class="form-control" id="modalTerm">
+            </div>
+            <div class="mb-3">
+              <label  class="col-form-label">Note</label>
+              <input type="text" class="form-control" id="modalNote">
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary" onclick="updateTerm()" data-bs-dismiss="modal">Update</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!--END MODAL EDIT-->
+  <!--MODAL DELETE-->
+  <div class="modal fade" id="exampleModalDelete" tabindex="-1" aria-labelledby="exampleModalLabelDelete" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabelDelete">Delete Term</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" data-bs-dismiss="modal">NO</button>
+          <button type="button" class="btn btn-danger" data-bs-dismiss="modal" onclick="deleteTerm()">YES</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!--END MODAL DELETE-->
+  <div class="right">
+    <a class="btn btn-primary btn-lg" href="input.html">Go back to input some more terms & notes</a>
+    <a class="btn btn-primary btn-lg" href="simple-flashcard.html" onclick="saveCheckedTerms()">Start Playing</a>
+  </div>
+</div>
+<div class="loginToUse" style="text-align: center">
+  <p>You must login in order to use this function</p>
+</div>
+
+<script>
+  loginStatus = localStorage.getItem("status");
+  checkLoginStatus(loginStatus);
+
+  let currentUser = localStorage.getItem("currentLogin")
+  let schemeValue;
+
+  let terms = [];
+  let termsReference = [];
+  let selectedData = [];
+
+  function showListTerm() {
+    let drawTable = "<table><tr><th>Review</th><th>Term</th><th>Note</th><th>Edit</th><th>Delete</th></tr>";
+    for (let i = 0; i <termsReference.length; i++){
+      drawTable += `<tr><td><input type="checkbox" id="terms${i}" name="term" value="terms${i}"></td>
+<td>${termsReference[i].term}</td><td>${termsReference[i].note}</td><td class="btn-change" ><button  class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal"
+                               data-bs-whatever="${termsReference[i].term}" onclick="editModal(${termsReference[i].id})"><i class="bi bi-pen-fill"></i>EDIT</button></td>
+                              <td class="btn-change"><button  class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#exampleModalDelete"
+                               data-bs-whatever="${termsReference[i].term}" onclick="deleteModal(${termsReference[i].id})"><i class="bi bi-bag-x"></i>DELETE</button></td></tr>`
+    } drawTable += `</table>`
+    document.getElementById("drawTable").innerHTML = drawTable;
+  }
+  showListTerm()
+
+  function findById(id){
+    for (let i = 0; i < termsReference.length; i++){
+      if (id === termsReference[i].id){
+        return termsReference[i];
+      }
+    }
+  }
+  let idUpdate = "";
+  //EDIT TERM
+  function editModal(id){
+    idUpdate = id;
+    let userEdit = findById(id);
+    document.getElementById("modalTerm").value = userEdit.term
+    document.getElementById("modalNote").value = userEdit.note
+  }
+
+  function updateTerm(){
+    let updateTermsReference = findById(idUpdate);
+    let updateTerm = document.getElementById("modalTerm").value
+    let updateNote = document.getElementById("modalNote").value
+
+    updateTermsReference.term = updateTerm;
+    updateTermsReference.note = updateNote;
+
+    for (let i = 0; i < termsReference.length; i++){
+      terms[i].term = termsReference[i].term;
+      terms[i].note = termsReference[i].note;
+    }
+
+    for (let i = 0; i < localData.length; i++){
+      if(localData[i].name === currentUser){
+        for(let j = 0; j < localData[i].data.texts.length; j++){
+          if (localData[i].data.texts[j].title === schemeValue){
+            localData[i].data.texts[j].terms = terms;
+          }
+        }
+      }
+    }
+    sessionStorage.removeItem("terms")
+    sessionStorage.setItem("terms", JSON.stringify(terms))
+    localStorage.removeItem("localData");
+    localStorage.setItem("localData", JSON.stringify(localData));
+    showListTerm()
+  }
+  //DELETE TERM
+  let idDelete = "";
+  function deleteModal(id){
+    idDelete = id;
+  }
+  function deleteTerm(){
+
+    for (let i = 0; i < terms.length; i++){
+      if(i === idDelete){
+        terms.splice(i, 1)
+        termsReference.splice(i, 1)
+        for(let j = 0; j < selectedData.length; j++){
+          if(selectedData[j].selectionValue === terms[i].term){
+            selectedData.splice(i, 1)
+          }
+        }
+      }
+    }
+    console.log(terms)
+    for (let i = 0; i < localData.length; i++){
+
+      if(localData[i].user === currentUser){
+        for(let j = 0; j < localData[i].data.texts.length; j++){
+          if (localData[i].data.texts[j].title === schemeValue){
+            localData[i].data.texts[j].terms = terms;
+          }
+        }
+      }
+    }
+    localStorage.removeItem("localData");
+    localStorage.setItem("localData", JSON.stringify(localData))
+    getSchemeValue();
+  }
+
+  //JS MODAL EDIT
+  var exampleModal = document.getElementById('exampleModal')
+  exampleModal.addEventListener('show.bs.modal', function (event) {
+    // Button that triggered the modal
+    var button = event.relatedTarget
+    // Extract info from data-bs-* attributes
+    var recipient = button.getAttribute('data-bs-whatever')
+    // If necessary, you could initiate an AJAX request here
+    // and then do the updating in a callback.
+    //
+    // Update the modal's content.
+    var modalTitle = exampleModal.querySelector('.modal-title')
+    var modalBodyInput = exampleModal.querySelector('.modal-body input')
+    modalTitle.textContent = 'Update for term: ' + recipient
+    modalBodyInput.value = recipient
+  })
+
+  //JS MODAL DELETE
+  var exampleModalDelete = document.getElementById('exampleModalDelete')
+  exampleModalDelete.addEventListener('show.bs.modal', function (event) {
+    // Button that triggered the modal
+    var button = event.relatedTarget
+    // Extract info from data-bs-* attributes
+    var recipient = button.getAttribute('data-bs-whatever')
+    // If necessary, you could initiate an AJAX request here
+    // and then do the updating in a callback.
+    //
+    // Update the modal's content.
+    var modalTitle = exampleModalDelete.querySelector('.modal-title')
+    var modalBodyInput = exampleModalDelete.querySelector('.modal-body input')
+    modalTitle.textContent = 'Are you sure you want to term:  ' + recipient + '?'
+    modalBodyInput.value = recipient
+  })
+
+  getTextCollection();
+  function getTextCollection(){
+    let drawScheme = "<option value='(select text title to begin)'>(select text title to begin)</option>";
+    let currentUser = localStorage.getItem("currentLogin")
+    localData = JSON.parse(localStorage.getItem("localData"));
+    for (let i = 0; i < localData.length; i++){
+      if(localData[i].user === currentUser){
+        if (localData[i].data.texts === []) {
+          alert("This user hasn't note anything yet")
+        } else {
+          for (let j = 0; j < localData[i].data.texts.length; j++){
+            drawScheme += `<option value="${localData[i].data.texts[j].title}">${localData[i].data.texts[j].title}</option>`
+          }
+        }
+      }
+    }
+    document.getElementById("textCollectionScheme").innerHTML = drawScheme;
+    showListTerm();
+  }
+
+  function getSchemeValue(){
+    schemeValue = document.getElementById("textCollectionScheme").value;
+    localData = JSON.parse(localStorage.getItem("localData"));
+    for (let i = 0; i < localData.length; i++){
+      if (localData[i].user === currentUser){
+        for (let j = 0; j < localData[i].data.texts.length; j++){
+          if(localData[i].data.texts[j].title === schemeValue){
+            selectedData = localData[i].data.texts[j].selectedData
+            console.log(selectedData, typeof selectedData)
+            for (let k = 0; k < localData[i].data.texts[j].terms.length; k++){
+              terms[k] = localData[i].data.texts[j].terms[k]
+            }
+          }
+        }
+        for (let i = 0; i < terms.length; i++){
+          termsReference[i] = {"id": 0, "term": "", "note": ""}
+          termsReference[i].id = i;
+          termsReference[i].term = terms[i].term;
+          termsReference[i].note = terms[i].note;
+        }
+      }
+    }
+    showListTerm()
+    sessionStorage.removeItem("selectedData")
+    sessionStorage.setItem("selectedData", JSON.stringify(selectedData))
+    sessionStorage.removeItem("terms");
+    sessionStorage.setItem("terms", JSON.stringify(terms));
+  }
+
+  function saveCheckedTerms(){
+    //get all checkbox
+    let checkboxes = document.querySelectorAll('input[type="checkbox"]');
+    let glossary = [];
+    //get only checked ones
+    for (let i = 0; i < checkboxes.length; i++){
+      if (checkboxes[i].checked){
+        glossary[glossary.length] = {"term": "", "note": ""}
+        glossary[glossary.length-1].term = terms[+checkboxes[i].value.slice(5)].term;
+        glossary[glossary.length-1].note = terms[+checkboxes[i].value.slice(5)].note;
+      }
+    }
+    sessionStorage.removeItem("glossary")
+    sessionStorage.setItem("glossary", JSON.stringify(glossary))
+  }
+</script>
+</body>
+</html>

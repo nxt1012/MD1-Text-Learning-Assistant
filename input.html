@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Contact us</title>
+  <title>Input text</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css" integrity="sha512-MV7K8+y+gLIBoVD59lQIYicR65iaqukzvf/nwasF0nqhPay5w/9lJmVM2hMDcnK1OnMGCdVK+iQrJ7lzPJQd1w==" crossorigin="anonymous" referrerpolicy="no-referrer" />
@@ -28,7 +28,8 @@
 
 <div class="topnav">
   <a class="active" href="index.html"><i class="fa fa-home" aria-hidden="true"></i></a>
-  <a href="simple-flashcard.html">Flashcards</a>
+  <a href="input.html">Input Text</a>
+  <a href="note-manager.html">Review Text</a>
   <a href="about.html">About</a>
   <a href="contact.html">Contact</a>
   <a href="register.html" id="complete">Register</a>
@@ -37,16 +38,19 @@
   <div class="login-container">
     <form action="">
       <input type="text" placeholder="Username" name="username" id="username">
-      <input type="text" placeholder="Password" name="password" id="password">
+      <input type="password" placeholder="Password" name="password" id="password">
       <button type="button" onclick="login()" id="loginButton">Login</button>
     </form>
   </div>
 </div>
-
+<div id="inputPage">
   <div>
-    <h3>Input some text and start taking note!</h3>
+    <h3>Select inputed text to add more note!</h3>
+    <select name="TextCollectionByTitle" id="textCollection" onchange="reloadInputPage()">
+    </select>
+    <h3>Or input some text and start taking note!</h3>
     <input type="text" placeholder="Text title" required id="textTitle">
-    <textarea id="userInputText" cols="50" rows="12">the quick brown fox jumps over the lazy dog</textarea>
+    <textarea id="userInputText" cols="50" rows="10"></textarea>
 
   </div>
   <div class="center">
@@ -61,20 +65,65 @@
   <div>
     <h3>You've highlighted something:</h3>
   </div>
-  <div style="border: 1px solid black; border-collapse: collapse; width: 100%; height: 300px">
+  <div style="border: 1px solid black; border-collapse: collapse; width: 100%; height: 240px">
     <p id="log" ></p>
   </div>
   <div class="right">
-    <a class="btn btn-primary btn-lg" href="simple-flashcard.html">Start Reviewing</a>
+    <a class="btn btn-primary btn-lg" href="input.html">Complete Input</a>
+    <a class="btn btn-primary btn-lg" href="note-manager.html">Start Reviewing</a>
   </div>
-
-<script src="js/comment.js"></script>
+</div>
+<div class="loginToUse" style="text-align: center">
+  <p>You must login in order to use this function</p>
+</div>
+<script src="js/Note.js"></script>
 <script>
   loginStatus = localStorage.getItem("status");
-  console.log(loginStatus)
   checkLoginStatus(loginStatus);
   let textInput = document.querySelector('textarea');
   textInput.addEventListener('select', logSelection);
+  getTextCollection();
+  function getTextCollection(){
+    let drawScheme = "<option value='newText'>New Text</option>";
+    let currentUser = localStorage.getItem("currentLogin")
+    localData = JSON.parse(localStorage.getItem("localData"));
+    for (let i = 0; i < localData.length; i++){
+      if(localData[i].user === currentUser){
+        if (localData[i].data.texts === []) {
+          alert("This user hasn't note anything yet")
+        } else {
+          for (let j = 0; j < localData[i].data.texts.length; j++){
+            drawScheme += `<option value="${localData[i].data.texts[j].title}">${localData[i].data.texts[j].title}</option>`
+          }
+        }
+      }
+    }
+    document.getElementById("textCollection").innerHTML = drawScheme;
+  }
+  function reloadInputPage(){
+    let value = document.getElementById("textCollection").value;
+    let currentUser = localStorage.getItem("currentLogin");
+    for( let i = 0; i < localData.length; i++){
+      if (localData[i].user === currentUser) {
+        for (let j = 0; j < localData[i].data.texts.length; j++){
+          if (localData[i].data.texts[j].title === value){
+            document.getElementById("userInputText").value = localData[i].data.texts[j].original;
+            document.getElementById("textTitle").value = localData[i].data.texts[j].title;
+            arrangedSelectCollection = localData[i].data.texts[j].selectedData;
+            console.log(localData[i].data.texts[j].selectedData)
+            originInput = localData[i].data.texts[j].original;
+            let firstString = originInput.substring(0, arrangedSelectCollection[0].selectionStart);
+            for (let k= 0; k< arrangedSelectCollection.length-1; k++) {
+              firstString = `${firstString} <span style="background-color: yellow">${arrangedSelectCollection[k].selectionValue}</span> ${originInput.substring(arrangedSelectCollection[k].selectionEnd, arrangedSelectCollection[k+1].selectionStart)}`
+            } firstString = `${firstString} <span style="background-color: yellow">${arrangedSelectCollection[arrangedSelectCollection.length-1].selectionValue}</span> ${originInput.substring(arrangedSelectCollection[arrangedSelectCollection.length-1].selectionEnd, originInput.length)}`
+            document.getElementById("log").innerHTML = firstString;
+            break;
+          }
+        }
+      }
+    }
+  }
+
 </script>
 </body>
 </html>

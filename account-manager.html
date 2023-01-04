@@ -39,7 +39,8 @@
 
 <div class="topnav">
   <a class="active" href="index.html"><i class="fa fa-home" aria-hidden="true"></i></a>
-  <a href="simple-flashcard.html">Flashcards</a>
+  <a href="input.html">Input Text</a>
+  <a href="note-manager.html">Review Text</a>
   <a href="about.html">About</a>
   <a href="contact.html">Contact</a>
   <a href="register.html" id="complete">Register</a>
@@ -48,16 +49,17 @@
   <div class="login-container">
     <form action="">
       <input type="text" placeholder="Username" name="username" id="username">
-      <input type="text" placeholder="Password" name="password" id="password">
+      <input type="password" placeholder="Password" name="password" id="password">
       <button type="button" onclick="login()" id="loginButton">Login</button>
     </form>
   </div>
 </div>
+<div id="managerPanel">
  <h3 class="center">ACCOUNT MANAGER PANEL</h3>
   <div class="center" style="margin-bottom: 20px">
     <input type="text" placeholder="Username" id="newUsername">
     <input type="text" placeholder="Email" id="newEmail">
-    <input type="text" placeholder="Password" id="newPassword">
+    <input type="password" placeholder="Password" id="newPassword">
     <button class="btn btn-success btn-lg" onclick="createUser()">Create User</button>
   </div>
   <div>
@@ -111,22 +113,29 @@
     </div>
   </div>
   <!--END MODAL DELETE-->
-
+</div>
+<div class="loginToUse" style="text-align: center">
+  <p>You must login in order to use this function</p>
+</div>
 <script>
-  let user = JSON.parse(localStorage.getItem("user"));
+  localData = JSON.parse(localStorage.getItem("localData"));
+  let user = [];
+  for (let i = 0; i < localData.length; i++){
+    user[i] = localData[i].data.userData;
+  }
   if (user === null){
     user = []
   }
-  console.log(user, typeof user)
   function showListUser() {
     let drawTable = "<table><tr><th>#</th><th>User</th><th>Email</th><th>Password</th><th>Edit</th><th>Delete</th></tr>";
     for (let i = 0; i <user.length; i++){
       drawTable += `<tr><td>${i+1}</td><td>${user[i].username}</td><td>${user[i].email}</td><td>${user[i].password}</td><td class="btn-change" ><button  class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal"
-                               data-bs-whatever="${user[i].name}" onclick="editModal(${user[i].id})"><i class="bi bi-pen-fill"></i>EDIT</button></td>
+                               data-bs-whatever="${user[i].username}" onclick="editModal(${user[i].id})"><i class="bi bi-pen-fill"></i>EDIT</button></td>
                               <td class="btn-change"><button  class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#exampleModalDelete"
-                               data-bs-whatever="${user[i].name}" onclick="deleteModal(${user[i].id})"><i class="bi bi-bag-x"></i>DELETE</button></td></tr>`
+                               data-bs-whatever="${user[i].username}" onclick="deleteModal(${user[i].id})"><i class="bi bi-bag-x"></i>DELETE</button></td></tr>`
     } drawTable += `</table>`
     document.getElementById("drawTable").innerHTML = drawTable;
+
   }
   showListUser()
   function createUser() {
@@ -134,19 +143,23 @@
     let newEmail = document.getElementById("newEmail").value;
     let newPassword = document.getElementById("newPassword").value;
     user[user.length] = new User(user.length, newUsername, newEmail, newPassword);
-    localStorage.removeItem("user");
-    localStorage.setItem("user", JSON.stringify(user));
+    localData[localData.length] = {"user": user[user.length-1].username, "data": {}}
+    localData[localData.length-1].data = {"userData" : {}, "texts" : []}
+    localData[localData.length-1].data.userData = user[user.length-1]
+    localStorage.setItem("localData", JSON.stringify(localData))
+    alert("Account created successfully!");
+    sessionStorage.removeItem("user");
+    sessionStorage.setItem("user", JSON.stringify(user));
     showListUser();
   }
 
   function findById(id){
-    for (let i = 0; i < user.length; i++){
-      if (id === user[i].id){
-        return user[i];
+    for (let i = 0; i < localData.length; i++){
+      if (id === localData[i].data.userData.id){
+        return localData[i];
       }
     }
   }
-
   let idUpdate = "";
   //EDIT USER
   function editModal(id){
@@ -163,9 +176,10 @@
     let updateUsername = document.getElementById("modalUsername").value
     let updateEmail = document.getElementById("modalEmail").value
     let updatePassword = document.getElementById("modalPassword").value
-    updateUser.username = updateUsername;
-    updateUser.email = updateEmail;
-    updateUser.password = updatePassword;
+    updateUser.user = updateUsername;
+    updateUser.data.userData.username = updateUsername;
+    updateUser.data.userData.email = updateEmail;
+    updateUser.data.userData.password = updatePassword;
     localStorage.removeItem("user");
     localStorage.setItem("user", JSON.stringify(user));
     showListUser()
@@ -176,13 +190,22 @@
     idDelete = id;
   }
   function deleteUser(){
+    for (let i = 0; i < localData.length; i++){
+      if( localData[i].data.userData.id === idDelete){
+        localData.splice(i, 1)
+      }
+    }
+    user = JSON.parse(sessionStorage.getItem("user"));
     for (let i = 0; i < user.length; i++){
-      if( user[i].id === idDelete){
+      if( i === idDelete){
         user.splice(i, 1)
       }
     }
-    localStorage.removeItem("user");
-    localStorage.setItem("user", JSON.stringify(user))
+    sessionStorage.removeItem("user");
+    sessionStorage.setItem("user", JSON.stringify(user));
+    localStorage.removeItem("localData");
+    localStorage.setItem("localData", JSON.stringify(localData))
+    window.location.reload()
     showListUser();
   }
 
@@ -200,7 +223,7 @@
     var modalTitle = exampleModal.querySelector('.modal-title')
     var modalBodyInput = exampleModal.querySelector('.modal-body input')
     console.log('check data modal ====> ', recipient.name)
-    modalTitle.textContent = 'Update User Information ' + recipient
+    modalTitle.textContent = 'Update user information for ' + recipient
     modalBodyInput.value = recipient
   })
 
@@ -218,7 +241,7 @@
     var modalTitle = exampleModalDelete.querySelector('.modal-title')
     var modalBodyInput = exampleModalDelete.querySelector('.modal-body input')
     console.log('check data modal ====> ', recipient.name)
-    modalTitle.textContent = 'Are you sure you want to delete  ' + recipient + '?'
+    modalTitle.textContent = 'Are you sure you want to delete user  ' + recipient + '?'
     modalBodyInput.value = recipient
   })
 </script>

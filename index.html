@@ -15,7 +15,8 @@
 
 <div class="topnav">
   <a class="active" href="index.html"><i class="fa fa-home" aria-hidden="true"></i></a>
-  <a href="simple-flashcard.html">Flashcards</a>
+  <a href="input.html">Input Text</a>
+  <a href="note-manager.html">Review Text</a>
   <a href="about.html">About</a>
   <a href="contact.html">Contact</a>
   <a href="register.html" id="complete">Register</a>
@@ -24,16 +25,19 @@
   <div class="login-container">
     <form action="">
       <input type="text" placeholder="Username" name="username" id="username">
-      <input type="text" placeholder="Password" name="password" id="password">
+      <input type="password" placeholder="Password" name="password" id="password">
       <button type="button" onclick="login()" id="loginButton">Login</button>
     </form>
   </div>
 </div>
-<div style="padding-left:16px">
+<div style="padding-left:16px" id="introPage">
   <h2>Get started with Text Learning Assistant</h2>
   <p>Do you sometime finding yourself like an ADHD person's trying to read? Didn't get meaning of the text you've read? Want to take quick-notes, and review later? Perhaps you're studying a new language, and want to take a real-life passage into your reading list 'cuz textbook is helpful but also boring?</p>
   <p>If so, <strong>Text Learning Assistant</strong> is just right for you.</p>
   <a class="btn btn-primary btn-lg" href="input.html">Get the party started!</a>
+</div>
+<div class="loginToUse" style="text-align: center">
+  <p>You must login in order to use this function</p>
 </div>
 <script>
   loginStatus = localStorage.getItem("status");
